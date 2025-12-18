@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-codeql-extractor = { git = "https://github.com/github/codeql", rev = "bb9daa00c39fb9a30272e689430a47f6ba8fac64" }
+codeql-extractor = { git = "https://github.com/github/codeql", rev = "98dc4390ea4d691185303aeaa206767c2b7c2d48" }
 tree-sitter-bash = {git = "https://github.com/SAdams601/tree-sitter-bash", branch = "master" }
 clap = { version = "4.4", features = ["derive"] }
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
