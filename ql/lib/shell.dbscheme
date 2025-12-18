@@ -1,0 +1,845 @@
+// CodeQL database schema for SHELL
+// Automatically generated from the tree-sitter grammar; do not edit
+
+/*- Files and folders -*/
+
+/**
+ * The location of an element.
+ * The location spans column `startcolumn` of line `startline` to
+ * column `endcolumn` of line `endline` in file `file`.
+ * For more information, see
+ * [Locations](https://codeql.github.com/docs/writing-codeql-queries/providing-locations-in-codeql-queries/).
+ */
+locations_default(
+  unique int id: @location_default,
+  int file: @file ref,
+  int beginLine: int ref,
+  int beginColumn: int ref,
+  int endLine: int ref,
+  int endColumn: int ref
+);
+
+files(
+  unique int id: @file,
+  string name: string ref
+);
+
+folders(
+  unique int id: @folder,
+  string name: string ref
+);
+
+@container = @file | @folder
+
+containerparent(
+  int parent: @container ref,
+  unique int child: @container ref
+);
+
+/*- Empty location -*/
+
+empty_location(
+  int location: @location_default ref
+);
+
+/*- Source location prefix -*/
+
+/**
+ * The source location of the snapshot.
+ */
+sourceLocationPrefix(string prefix : string ref);
+
+/*- Diagnostic messages -*/
+
+diagnostics(
+  unique int id: @diagnostic,
+  int severity: int ref,
+  string error_tag: string ref,
+  string error_message: string ref,
+  string full_error_message: string ref,
+  int location: @location_default ref
+);
+
+/*- Diagnostic messages: severity -*/
+
+case @diagnostic.severity of
+  10 = @diagnostic_debug
+| 20 = @diagnostic_info
+| 30 = @diagnostic_warning
+| 40 = @diagnostic_error
+;
+
+/*- YAML -*/
+
+#keyset[parent, idx]
+yaml (unique int id: @yaml_node,
+      int kind: int ref,
+      int parent: @yaml_node_parent ref,
+      int idx: int ref,
+      string tag: string ref,
+      string tostring: string ref);
+
+case @yaml_node.kind of
+  0 = @yaml_scalar_node
+| 1 = @yaml_mapping_node
+| 2 = @yaml_sequence_node
+| 3 = @yaml_alias_node
+;
+
+@yaml_collection_node = @yaml_mapping_node | @yaml_sequence_node;
+
+@yaml_node_parent = @yaml_collection_node | @file;
+
+yaml_anchors (unique int node: @yaml_node ref,
+              string anchor: string ref);
+
+yaml_aliases (unique int alias: @yaml_alias_node ref,
+              string target: string ref);
+
+yaml_scalars (unique int scalar: @yaml_scalar_node ref,
+              int style: int ref,
+              string value: string ref);
+
+yaml_errors (unique int id: @yaml_error,
+             string message: string ref);
+
+yaml_locations(unique int locatable: @yaml_locatable ref,
+             int location: @location_default ref);
+
+@yaml_locatable = @yaml_node | @yaml_error;
+
+/*- Database metadata -*/
+databaseMetadata(
+  string metadataKey: string ref,
+  string value: string ref
+);
+
+overlayChangedFiles(
+  string path: string ref
+);
+
+/*- SHELL dbscheme -*/
+@shell_underscore_expression = @shell_binary_expression | @shell_concatenation | @shell_parenthesized_expression | @shell_postfix_expression | @shell_ternary_expression | @shell_token_word | @shell_unary_expression | @shell_underscore_primary_expression
+
+@shell_underscore_primary_expression = @shell_arithmetic_expansion | @shell_brace_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_process_substitution | @shell_simple_expansion | @shell_string__ | @shell_token_ansi_c_string | @shell_token_raw_string | @shell_token_word | @shell_translated_string
+
+@shell_underscore_statement = @shell_c_style_for_statement | @shell_case_statement | @shell_command | @shell_compound_statement | @shell_declaration_command | @shell_for_statement | @shell_function_definition | @shell_if_statement | @shell_list | @shell_negated_command | @shell_pipeline | @shell_redirected_statement | @shell_subshell | @shell_test_command | @shell_unset_command | @shell_variable_assignment | @shell_variable_assignments | @shell_while_statement
+
+@shell_arithmetic_expansion_child_type = @shell_binary_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_parenthesized_expression | @shell_postfix_expression | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_ternary_expression | @shell_token_raw_string | @shell_token_variable_name | @shell_unary_expression
+
+#keyset[shell_arithmetic_expansion, index]
+shell_arithmetic_expansion_child(
+  int shell_arithmetic_expansion: @shell_arithmetic_expansion ref,
+  int index: int ref,
+  unique int child: @shell_arithmetic_expansion_child_type ref
+);
+
+shell_arithmetic_expansion_def(
+  unique int id: @shell_arithmetic_expansion
+);
+
+@shell_array_child_type = @shell_concatenation | @shell_underscore_primary_expression
+
+#keyset[shell_array, index]
+shell_array_child(
+  int shell_array: @shell_array ref,
+  int index: int ref,
+  unique int child: @shell_array_child_type ref
+);
+
+shell_array_def(
+  unique int id: @shell_array
+);
+
+@shell_binary_expression_left_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+shell_binary_expression_left(
+  unique int shell_binary_expression: @shell_binary_expression ref,
+  unique int left: @shell_binary_expression_left_type ref
+);
+
+@shell_binary_expression_operator_type = @shell_reserved_word | @shell_token_test_operator
+
+@shell_binary_expression_right_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_extglob_pattern | @shell_token_raw_string | @shell_token_regex | @shell_token_variable_name | @shell_underscore_expression
+
+#keyset[shell_binary_expression, index]
+shell_binary_expression_right(
+  int shell_binary_expression: @shell_binary_expression ref,
+  int index: int ref,
+  unique int right: @shell_binary_expression_right_type ref
+);
+
+@shell_binary_expression_child_type = @shell_binary_expression | @shell_expansion | @shell_number | @shell_token_variable_name
+
+#keyset[shell_binary_expression, index]
+shell_binary_expression_child(
+  int shell_binary_expression: @shell_binary_expression ref,
+  int index: int ref,
+  unique int child: @shell_binary_expression_child_type ref
+);
+
+shell_binary_expression_def(
+  unique int id: @shell_binary_expression,
+  int operator: @shell_binary_expression_operator_type ref
+);
+
+#keyset[shell_brace_expression, index]
+shell_brace_expression_child(
+  int shell_brace_expression: @shell_brace_expression ref,
+  int index: int ref,
+  unique int child: @shell_number ref
+);
+
+shell_brace_expression_def(
+  unique int id: @shell_brace_expression
+);
+
+@shell_c_style_for_statement_body_type = @shell_compound_statement | @shell_do_group
+
+@shell_c_style_for_statement_condition_type = @shell_binary_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_parenthesized_expression | @shell_postfix_expression | @shell_reserved_word | @shell_simple_expansion | @shell_string__ | @shell_token_word | @shell_unary_expression | @shell_variable_assignment
+
+#keyset[shell_c_style_for_statement, index]
+shell_c_style_for_statement_condition(
+  int shell_c_style_for_statement: @shell_c_style_for_statement ref,
+  int index: int ref,
+  unique int condition: @shell_c_style_for_statement_condition_type ref
+);
+
+@shell_c_style_for_statement_initializer_type = @shell_binary_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_parenthesized_expression | @shell_postfix_expression | @shell_reserved_word | @shell_simple_expansion | @shell_string__ | @shell_token_word | @shell_unary_expression | @shell_variable_assignment
+
+#keyset[shell_c_style_for_statement, index]
+shell_c_style_for_statement_initializer(
+  int shell_c_style_for_statement: @shell_c_style_for_statement ref,
+  int index: int ref,
+  unique int initializer: @shell_c_style_for_statement_initializer_type ref
+);
+
+@shell_c_style_for_statement_update_type = @shell_binary_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_parenthesized_expression | @shell_postfix_expression | @shell_reserved_word | @shell_simple_expansion | @shell_string__ | @shell_token_word | @shell_unary_expression | @shell_variable_assignment
+
+#keyset[shell_c_style_for_statement, index]
+shell_c_style_for_statement_update(
+  int shell_c_style_for_statement: @shell_c_style_for_statement ref,
+  int index: int ref,
+  unique int update: @shell_c_style_for_statement_update_type ref
+);
+
+shell_c_style_for_statement_def(
+  unique int id: @shell_c_style_for_statement,
+  int body: @shell_c_style_for_statement_body_type ref
+);
+
+@shell_case_item_fallthrough_type = @shell_reserved_word
+
+shell_case_item_fallthrough(
+  unique int shell_case_item: @shell_case_item ref,
+  unique int fallthrough: @shell_case_item_fallthrough_type ref
+);
+
+shell_case_item_termination(
+  unique int shell_case_item: @shell_case_item ref,
+  unique int termination: @shell_reserved_word ref
+);
+
+@shell_case_item_value_type = @shell_concatenation | @shell_token_extglob_pattern | @shell_underscore_primary_expression
+
+#keyset[shell_case_item, index]
+shell_case_item_value(
+  int shell_case_item: @shell_case_item ref,
+  int index: int ref,
+  unique int value: @shell_case_item_value_type ref
+);
+
+#keyset[shell_case_item, index]
+shell_case_item_child(
+  int shell_case_item: @shell_case_item ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_case_item_def(
+  unique int id: @shell_case_item
+);
+
+@shell_case_statement_value_type = @shell_concatenation | @shell_underscore_primary_expression
+
+#keyset[shell_case_statement, index]
+shell_case_statement_child(
+  int shell_case_statement: @shell_case_statement ref,
+  int index: int ref,
+  unique int child: @shell_case_item ref
+);
+
+shell_case_statement_def(
+  unique int id: @shell_case_statement,
+  int value: @shell_case_statement_value_type ref
+);
+
+@shell_command_argument_type = @shell_concatenation | @shell_reserved_word | @shell_token_regex | @shell_underscore_primary_expression
+
+#keyset[shell_command, index]
+shell_command_argument(
+  int shell_command: @shell_command ref,
+  int index: int ref,
+  unique int argument: @shell_command_argument_type ref
+);
+
+@shell_command_redirect_type = @shell_file_redirect | @shell_herestring_redirect
+
+#keyset[shell_command, index]
+shell_command_redirect(
+  int shell_command: @shell_command ref,
+  int index: int ref,
+  unique int redirect: @shell_command_redirect_type ref
+);
+
+@shell_command_child_type = @shell_subshell | @shell_variable_assignment
+
+#keyset[shell_command, index]
+shell_command_child(
+  int shell_command: @shell_command ref,
+  int index: int ref,
+  unique int child: @shell_command_child_type ref
+);
+
+shell_command_def(
+  unique int id: @shell_command,
+  int name: @shell_command_name ref
+);
+
+@shell_command_name_child_type = @shell_concatenation | @shell_underscore_primary_expression
+
+shell_command_name_def(
+  unique int id: @shell_command_name,
+  int child: @shell_command_name_child_type ref
+);
+
+shell_command_substitution_redirect(
+  unique int shell_command_substitution: @shell_command_substitution ref,
+  unique int redirect: @shell_file_redirect ref
+);
+
+#keyset[shell_command_substitution, index]
+shell_command_substitution_child(
+  int shell_command_substitution: @shell_command_substitution ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_command_substitution_def(
+  unique int id: @shell_command_substitution
+);
+
+@shell_compound_statement_child_type = @shell_binary_expression | @shell_command_substitution | @shell_expansion | @shell_number | @shell_parenthesized_expression | @shell_postfix_expression | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_ternary_expression | @shell_token_raw_string | @shell_token_variable_name | @shell_unary_expression | @shell_underscore_statement
+
+#keyset[shell_compound_statement, index]
+shell_compound_statement_child(
+  int shell_compound_statement: @shell_compound_statement ref,
+  int index: int ref,
+  unique int child: @shell_compound_statement_child_type ref
+);
+
+shell_compound_statement_def(
+  unique int id: @shell_compound_statement
+);
+
+@shell_concatenation_child_type = @shell_array | @shell_token_variable_name | @shell_underscore_primary_expression
+
+#keyset[shell_concatenation, index]
+shell_concatenation_child(
+  int shell_concatenation: @shell_concatenation ref,
+  int index: int ref,
+  unique int child: @shell_concatenation_child_type ref
+);
+
+shell_concatenation_def(
+  unique int id: @shell_concatenation
+);
+
+@shell_declaration_command_child_type = @shell_concatenation | @shell_token_variable_name | @shell_underscore_primary_expression | @shell_variable_assignment
+
+#keyset[shell_declaration_command, index]
+shell_declaration_command_child(
+  int shell_declaration_command: @shell_declaration_command ref,
+  int index: int ref,
+  unique int child: @shell_declaration_command_child_type ref
+);
+
+shell_declaration_command_def(
+  unique int id: @shell_declaration_command
+);
+
+#keyset[shell_do_group, index]
+shell_do_group_child(
+  int shell_do_group: @shell_do_group ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_do_group_def(
+  unique int id: @shell_do_group
+);
+
+#keyset[shell_elif_clause, index]
+shell_elif_clause_child(
+  int shell_elif_clause: @shell_elif_clause ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_elif_clause_def(
+  unique int id: @shell_elif_clause
+);
+
+#keyset[shell_else_clause, index]
+shell_else_clause_child(
+  int shell_else_clause: @shell_else_clause ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_else_clause_def(
+  unique int id: @shell_else_clause
+);
+
+@shell_expansion_operator_type = @shell_reserved_word
+
+#keyset[shell_expansion, index]
+shell_expansion_operator(
+  int shell_expansion: @shell_expansion ref,
+  int index: int ref,
+  unique int operator: @shell_expansion_operator_type ref
+);
+
+@shell_expansion_child_type = @shell_array | @shell_binary_expression | @shell_concatenation | @shell_parenthesized_expression | @shell_subscript | @shell_token_regex | @shell_token_special_variable_name | @shell_token_variable_name | @shell_underscore_primary_expression
+
+#keyset[shell_expansion, index]
+shell_expansion_child(
+  int shell_expansion: @shell_expansion ref,
+  int index: int ref,
+  unique int child: @shell_expansion_child_type ref
+);
+
+shell_expansion_def(
+  unique int id: @shell_expansion
+);
+
+shell_file_redirect_descriptor(
+  unique int shell_file_redirect: @shell_file_redirect ref,
+  unique int descriptor: @shell_token_file_descriptor ref
+);
+
+@shell_file_redirect_destination_type = @shell_concatenation | @shell_underscore_primary_expression
+
+#keyset[shell_file_redirect, index]
+shell_file_redirect_destination(
+  int shell_file_redirect: @shell_file_redirect ref,
+  int index: int ref,
+  unique int destination: @shell_file_redirect_destination_type ref
+);
+
+shell_file_redirect_def(
+  unique int id: @shell_file_redirect
+);
+
+@shell_for_statement_value_type = @shell_concatenation | @shell_underscore_primary_expression
+
+#keyset[shell_for_statement, index]
+shell_for_statement_value(
+  int shell_for_statement: @shell_for_statement ref,
+  int index: int ref,
+  unique int value: @shell_for_statement_value_type ref
+);
+
+shell_for_statement_def(
+  unique int id: @shell_for_statement,
+  int body: @shell_do_group ref,
+  int variable: @shell_token_variable_name ref
+);
+
+@shell_function_definition_body_type = @shell_compound_statement | @shell_if_statement | @shell_subshell | @shell_test_command
+
+@shell_function_definition_redirect_type = @shell_file_redirect | @shell_herestring_redirect
+
+shell_function_definition_redirect(
+  unique int shell_function_definition: @shell_function_definition ref,
+  unique int redirect: @shell_function_definition_redirect_type ref
+);
+
+shell_function_definition_def(
+  unique int id: @shell_function_definition,
+  int body: @shell_function_definition_body_type ref,
+  int name: @shell_token_word ref
+);
+
+@shell_heredoc_body_child_type = @shell_command_substitution | @shell_expansion | @shell_simple_expansion | @shell_token_heredoc_content
+
+#keyset[shell_heredoc_body, index]
+shell_heredoc_body_child(
+  int shell_heredoc_body: @shell_heredoc_body ref,
+  int index: int ref,
+  unique int child: @shell_heredoc_body_child_type ref
+);
+
+shell_heredoc_body_def(
+  unique int id: @shell_heredoc_body
+);
+
+@shell_heredoc_redirect_argument_type = @shell_concatenation | @shell_underscore_primary_expression
+
+#keyset[shell_heredoc_redirect, index]
+shell_heredoc_redirect_argument(
+  int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  int index: int ref,
+  unique int argument: @shell_heredoc_redirect_argument_type ref
+);
+
+shell_heredoc_redirect_descriptor(
+  unique int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  unique int descriptor: @shell_token_file_descriptor ref
+);
+
+@shell_heredoc_redirect_operator_type = @shell_reserved_word
+
+shell_heredoc_redirect_operator(
+  unique int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  unique int operator: @shell_heredoc_redirect_operator_type ref
+);
+
+@shell_heredoc_redirect_redirect_type = @shell_file_redirect | @shell_herestring_redirect
+
+#keyset[shell_heredoc_redirect, index]
+shell_heredoc_redirect_redirect(
+  int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  int index: int ref,
+  unique int redirect: @shell_heredoc_redirect_redirect_type ref
+);
+
+shell_heredoc_redirect_right(
+  unique int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  unique int right: @shell_underscore_statement ref
+);
+
+@shell_heredoc_redirect_child_type = @shell_heredoc_body | @shell_pipeline | @shell_token_heredoc_end | @shell_token_heredoc_start
+
+#keyset[shell_heredoc_redirect, index]
+shell_heredoc_redirect_child(
+  int shell_heredoc_redirect: @shell_heredoc_redirect ref,
+  int index: int ref,
+  unique int child: @shell_heredoc_redirect_child_type ref
+);
+
+shell_heredoc_redirect_def(
+  unique int id: @shell_heredoc_redirect
+);
+
+shell_herestring_redirect_descriptor(
+  unique int shell_herestring_redirect: @shell_herestring_redirect ref,
+  unique int descriptor: @shell_token_file_descriptor ref
+);
+
+@shell_herestring_redirect_child_type = @shell_concatenation | @shell_underscore_primary_expression
+
+shell_herestring_redirect_def(
+  unique int id: @shell_herestring_redirect,
+  int child: @shell_herestring_redirect_child_type ref
+);
+
+@shell_if_statement_condition_type = @shell_reserved_word | @shell_underscore_statement
+
+#keyset[shell_if_statement, index]
+shell_if_statement_condition(
+  int shell_if_statement: @shell_if_statement ref,
+  int index: int ref,
+  unique int condition: @shell_if_statement_condition_type ref
+);
+
+@shell_if_statement_child_type = @shell_elif_clause | @shell_else_clause | @shell_underscore_statement
+
+#keyset[shell_if_statement, index]
+shell_if_statement_child(
+  int shell_if_statement: @shell_if_statement ref,
+  int index: int ref,
+  unique int child: @shell_if_statement_child_type ref
+);
+
+shell_if_statement_def(
+  unique int id: @shell_if_statement
+);
+
+#keyset[shell_list, index]
+shell_list_child(
+  int shell_list: @shell_list ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_list_def(
+  unique int id: @shell_list
+);
+
+@shell_negated_command_child_type = @shell_command | @shell_subshell | @shell_test_command | @shell_variable_assignment
+
+shell_negated_command_def(
+  unique int id: @shell_negated_command,
+  int child: @shell_negated_command_child_type ref
+);
+
+@shell_number_child_type = @shell_command_substitution | @shell_expansion
+
+shell_number_child(
+  unique int shell_number: @shell_number ref,
+  unique int child: @shell_number_child_type ref
+);
+
+shell_number_def(
+  unique int id: @shell_number
+);
+
+@shell_parenthesized_expression_child_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression | @shell_variable_assignment
+
+#keyset[shell_parenthesized_expression, index]
+shell_parenthesized_expression_child(
+  int shell_parenthesized_expression: @shell_parenthesized_expression ref,
+  int index: int ref,
+  unique int child: @shell_parenthesized_expression_child_type ref
+);
+
+shell_parenthesized_expression_def(
+  unique int id: @shell_parenthesized_expression
+);
+
+#keyset[shell_pipeline, index]
+shell_pipeline_child(
+  int shell_pipeline: @shell_pipeline ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_pipeline_def(
+  unique int id: @shell_pipeline
+);
+
+case @shell_postfix_expression.operator of
+  0 = @shell_postfix_expression_plusplus
+| 1 = @shell_postfix_expression_minusminus
+;
+
+
+@shell_postfix_expression_child_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+shell_postfix_expression_def(
+  unique int id: @shell_postfix_expression,
+  int operator: int ref,
+  int child: @shell_postfix_expression_child_type ref
+);
+
+#keyset[shell_process_substitution, index]
+shell_process_substitution_child(
+  int shell_process_substitution: @shell_process_substitution ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_process_substitution_def(
+  unique int id: @shell_process_substitution
+);
+
+#keyset[shell_program, index]
+shell_program_child(
+  int shell_program: @shell_program ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_program_def(
+  unique int id: @shell_program
+);
+
+shell_redirected_statement_body(
+  unique int shell_redirected_statement: @shell_redirected_statement ref,
+  unique int body: @shell_underscore_statement ref
+);
+
+@shell_redirected_statement_redirect_type = @shell_file_redirect | @shell_heredoc_redirect | @shell_herestring_redirect
+
+#keyset[shell_redirected_statement, index]
+shell_redirected_statement_redirect(
+  int shell_redirected_statement: @shell_redirected_statement ref,
+  int index: int ref,
+  unique int redirect: @shell_redirected_statement_redirect_type ref
+);
+
+shell_redirected_statement_child(
+  unique int shell_redirected_statement: @shell_redirected_statement ref,
+  unique int child: @shell_herestring_redirect ref
+);
+
+shell_redirected_statement_def(
+  unique int id: @shell_redirected_statement
+);
+
+@shell_simple_expansion_child_type = @shell_token_special_variable_name | @shell_token_variable_name
+
+shell_simple_expansion_def(
+  unique int id: @shell_simple_expansion,
+  int child: @shell_simple_expansion_child_type ref
+);
+
+@shell_string_child_type = @shell_arithmetic_expansion | @shell_command_substitution | @shell_expansion | @shell_simple_expansion | @shell_token_string_content
+
+#keyset[shell_string__, index]
+shell_string_child(
+  int shell_string__: @shell_string__ ref,
+  int index: int ref,
+  unique int child: @shell_string_child_type ref
+);
+
+shell_string_def(
+  unique int id: @shell_string__
+);
+
+@shell_subscript_index_type = @shell_binary_expression | @shell_compound_statement | @shell_concatenation | @shell_subshell | @shell_unary_expression | @shell_underscore_primary_expression
+
+shell_subscript_def(
+  unique int id: @shell_subscript,
+  int index: @shell_subscript_index_type ref,
+  int name: @shell_token_variable_name ref
+);
+
+#keyset[shell_subshell, index]
+shell_subshell_child(
+  int shell_subshell: @shell_subshell ref,
+  int index: int ref,
+  unique int child: @shell_underscore_statement ref
+);
+
+shell_subshell_def(
+  unique int id: @shell_subshell
+);
+
+@shell_ternary_expression_alternative_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+@shell_ternary_expression_condition_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+@shell_ternary_expression_consequence_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+shell_ternary_expression_def(
+  unique int id: @shell_ternary_expression,
+  int alternative: @shell_ternary_expression_alternative_type ref,
+  int condition: @shell_ternary_expression_condition_type ref,
+  int consequence: @shell_ternary_expression_consequence_type ref
+);
+
+@shell_test_command_child_type = @shell_redirected_statement | @shell_underscore_expression
+
+shell_test_command_child(
+  unique int shell_test_command: @shell_test_command ref,
+  unique int child: @shell_test_command_child_type ref
+);
+
+shell_test_command_def(
+  unique int id: @shell_test_command
+);
+
+shell_translated_string_def(
+  unique int id: @shell_translated_string,
+  int child: @shell_string__ ref
+);
+
+@shell_unary_expression_operator_type = @shell_reserved_word | @shell_token_test_operator
+
+@shell_unary_expression_child_type = @shell_command_substitution | @shell_expansion | @shell_number | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_token_raw_string | @shell_token_variable_name | @shell_underscore_expression
+
+shell_unary_expression_def(
+  unique int id: @shell_unary_expression,
+  int operator: @shell_unary_expression_operator_type ref,
+  int child: @shell_unary_expression_child_type ref
+);
+
+@shell_unset_command_child_type = @shell_concatenation | @shell_token_variable_name | @shell_underscore_primary_expression
+
+#keyset[shell_unset_command, index]
+shell_unset_command_child(
+  int shell_unset_command: @shell_unset_command ref,
+  int index: int ref,
+  unique int child: @shell_unset_command_child_type ref
+);
+
+shell_unset_command_def(
+  unique int id: @shell_unset_command
+);
+
+@shell_variable_assignment_name_type = @shell_subscript | @shell_token_variable_name
+
+@shell_variable_assignment_value_type = @shell_array | @shell_binary_expression | @shell_concatenation | @shell_parenthesized_expression | @shell_postfix_expression | @shell_unary_expression | @shell_underscore_primary_expression | @shell_variable_assignment
+
+shell_variable_assignment_def(
+  unique int id: @shell_variable_assignment,
+  int name: @shell_variable_assignment_name_type ref,
+  int value: @shell_variable_assignment_value_type ref
+);
+
+#keyset[shell_variable_assignments, index]
+shell_variable_assignments_child(
+  int shell_variable_assignments: @shell_variable_assignments ref,
+  int index: int ref,
+  unique int child: @shell_variable_assignment ref
+);
+
+shell_variable_assignments_def(
+  unique int id: @shell_variable_assignments
+);
+
+@shell_while_statement_condition_type = @shell_reserved_word | @shell_underscore_statement
+
+#keyset[shell_while_statement, index]
+shell_while_statement_condition(
+  int shell_while_statement: @shell_while_statement ref,
+  int index: int ref,
+  unique int condition: @shell_while_statement_condition_type ref
+);
+
+shell_while_statement_def(
+  unique int id: @shell_while_statement,
+  int body: @shell_do_group ref
+);
+
+shell_tokeninfo(
+  unique int id: @shell_token,
+  int kind: int ref,
+  string value: string ref
+);
+
+case @shell_token.kind of
+  0 = @shell_reserved_word
+| 1 = @shell_token_ansi_c_string
+| 2 = @shell_token_comment
+| 3 = @shell_token_extglob_pattern
+| 4 = @shell_token_file_descriptor
+| 5 = @shell_token_heredoc_content
+| 6 = @shell_token_heredoc_end
+| 7 = @shell_token_heredoc_start
+| 8 = @shell_token_raw_string
+| 9 = @shell_token_regex
+| 10 = @shell_token_special_variable_name
+| 11 = @shell_token_string_content
+| 12 = @shell_token_test_operator
+| 13 = @shell_token_variable_name
+| 14 = @shell_token_word
+;
+
+
+@shell_ast_node = @shell_arithmetic_expansion | @shell_array | @shell_binary_expression | @shell_brace_expression | @shell_c_style_for_statement | @shell_case_item | @shell_case_statement | @shell_command | @shell_command_name | @shell_command_substitution | @shell_compound_statement | @shell_concatenation | @shell_declaration_command | @shell_do_group | @shell_elif_clause | @shell_else_clause | @shell_expansion | @shell_file_redirect | @shell_for_statement | @shell_function_definition | @shell_heredoc_body | @shell_heredoc_redirect | @shell_herestring_redirect | @shell_if_statement | @shell_list | @shell_negated_command | @shell_number | @shell_parenthesized_expression | @shell_pipeline | @shell_postfix_expression | @shell_process_substitution | @shell_program | @shell_redirected_statement | @shell_simple_expansion | @shell_string__ | @shell_subscript | @shell_subshell | @shell_ternary_expression | @shell_test_command | @shell_token | @shell_translated_string | @shell_unary_expression | @shell_unset_command | @shell_variable_assignment | @shell_variable_assignments | @shell_while_statement
+
+shell_ast_node_location(
+  unique int node: @shell_ast_node ref,
+  int loc: @location_default ref
+);
+
+#keyset[parent, parent_index]
+shell_ast_node_parent(
+  unique int node: @shell_ast_node ref,
+  int parent: @shell_ast_node ref,
+  int parent_index: int ref
+);
+
