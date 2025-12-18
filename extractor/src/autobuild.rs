@@ -11,9 +11,9 @@ pub struct Options {}
 
 pub fn run(_: Options) -> std::io::Result<()> {
     let database = env::var("CODEQL_EXTRACTOR_SHELL_WIP_DATABASE")
-        .expect("CODEQL_EXTRACTOR_LUA_SHELL_DATABASE not set");
+        .expect("CODEQL_EXTRACTOR_SHELL_DATABASE not set");
 
-    autobuilder::Autobuilder::new("lua", PathBuf::from(database))
+    autobuilder::Autobuilder::new("shell", PathBuf::from(database))
         .include_extensions(&[".sh"])
         .exclude_globs(&["**/.git"])
         .size_limit("10m")
