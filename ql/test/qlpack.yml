@@ -1,0 +1,7 @@
+name: sadams/shell-tests
+groups: [shell, test]
+dependencies:
+  sadams/shell-all: ${workspace}
+extractor: shell
+tests: .
+warnOnImplicitThis: true

@@ -1,0 +1,13 @@
+---
+library: true
+warnOnImplicitThis: false
+name: sadams/shell-all
+version: 0.0.1
+dependencies:
+  codeql/util: ^1.0.12
+  codeql/yaml: ^1.0.25
+dbscheme: shell.dbscheme
+extractor: shell
+upgrades: upgrades
+groups:
+ - shell

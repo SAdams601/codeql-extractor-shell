@@ -4,3 +4,6 @@ extractor-pack/
 .codeql/
 ql/src/testing/
 testing/
+testing-db
+**/*.testproj/**
+*.actual
